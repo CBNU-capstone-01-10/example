@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+</head>
+
+<body>
+    <video id="local-video" width="320" height="240" autoplay muted></video>
+    <script>
+        const socket = io();
+        const video = document.querySelector('video');
+
+        navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false
+        })
+            .then(stream => {
+                video.srcObject = stream;
+                video.play();
+
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const draw = () => {
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const imageData = canvas.toDataURL('image/jpeg');
+
+                    socket.emit('image', imageData);
+                };
+                setInterval(draw, 100);
+            })
+            .catch(err => {
+                console.error(err);
+            });
+    </script>
+</body>
+
+</html>
